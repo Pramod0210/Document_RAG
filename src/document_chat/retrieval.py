@@ -19,10 +19,12 @@ class ConversationalRAG:
             self.llm = self._load_llm()
             self.contextaualize_question = PROMPT_REGISTRY[PromptType.CONTEXTUALIZE_QUESTION.value]
             self.context_qa = PROMPT_REGISTRY[PromptType.CONTEXT_QA.value]
-            if retriever is None:
-                raise ValueError("Retriever is not provided.")
+            # if retriever is None:
+                # raise ValueError("Retriever is not provided.")
             self.retriever = retriever
-            self._build_lcel_chain()
+            if self.retriever is not None:
+                self._build_lcel_chain()
+            # self._build_lcel_chain()
             self.log.info(f"ConversationalRAG initialized with context and history aware retriever.")
 
         except Exception as e:
@@ -38,6 +40,7 @@ class ConversationalRAG:
             
             vectorestore = FAISS.load_local(index_path, embeddings, allow_dangerous_deserialization=True)
             self.retriever = vectorestore.as_retriever(search_type="similarity", search_kwargs={"k": 5})
+            self._build_lcel_chain()
             self.log.info("Retriever loaded from FAISS.")
             return self.retriever
         

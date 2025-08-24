@@ -123,7 +123,7 @@ class FaissManager:
 
 class ChatIngestor:
     def __init__(self,
-                 temp_base ="data",
+                 temp_base ="data/data_chat",
                  faiss_base = "faiss_index",
                  use_session_dirs = True,
                  session_id = None):

@@ -16,6 +16,9 @@ from src.document_analyzer.data_analysis import DocumentAnalyzer
 from src.document_compare.doc_compare import DocumentCompareLLM
 from src.document_chat.retrieval import ConversationalRAG
 
+UPLOAD_BASE = os.getenv("UPLOAD_BASE", "data")
+FAISS_BASE = os.getenv("FAISS_BASE", "faiss_index")
+
 app = FastAPI(title="Document RAG", version="0.1.0")
 
 app.add_middleware(
@@ -38,9 +41,13 @@ class FastAPIFileAdaptor:
         self._uf.file.seek(0)
         return self._uf.file
     
-def _read_pdf_via_handler(handler: DocumentHandler):
+def _read_pdf_via_handler(handler: DocumentHandler, path):
     try:
-        pass
+        if hasattr(handler, "read_pdf"):
+            return handler.read_pdf(path)
+        if hasattr(handler, "read_"):
+            return handler.read_(path)
+        raise RuntimeError("Failed to read PDF")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to read PDF: {str(e)}")
 
@@ -56,7 +63,7 @@ async def health():
 async def analyze(file: UploadFile = File(...)):
     try:
         dh = DocumentHandler()
-        saved_path = dh.save_pdf(FastAPIFileAdapetor(file))
+        saved_path = dh.save_pdf(FastAPIFileAdaptor(file))
         text = _read_pdf_via_handler(dh, saved_path)
         analyzer = DocumentAnalyzer()
         result = analyzer.analyze_document(text)

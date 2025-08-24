@@ -101,45 +101,98 @@ class FaissManager:
             self.log.error(f"Error adding documents: {str(e)}")
             raise CustomException(f"Failed to add documents: {str(e)}", e) from e
     
-    def load_or_create(self):
+    def load_or_create(self, texts:Optional[List[str]]=None, metadata: Optional[List[dict]]=None):
         try:
             if self._exists():
                 self.vs = FAISS.load_local(str(self.index_dir), self.emb, allow_dangerous_deserialization=True)
                 self.log.info("Loaded existing FaissManager.")
                 return self.vs
+            
+            if not texts:
+                raise CustomException("No texts provided to create FaissManager.", e)
+            self.vs = FAISS.from_texts(texts=texts, embedding=self.emb, metadatas=metadata or [] )
+            self.vs.save_local(self.index_dir)
+
+            self.log.info("Loaded or created new FaissManager.")
+            return self.vs
+        
         except Exception as e:
             self.log.error(f"Error loading or creating FaissManager: {str(e)}")
             raise CustomException(f"Failed to load or create FaissManager:", e) from e
 
 
 class ChatIngestor:
-    def __init__(self):
+    def __init__(self,
+                 temp_base ="data",
+                 faiss_base = "faiss_index",
+                 use_session_dirs = True,
+                 session_id = None):
         try:
-            pass
+            self.log = CustomLogger().get_logger(__name__)
+            self.model_loader = ModelLoader()
+            self.use_session = use_session_dirs
+            self.session_id = session_id or _session_id()
+            self.temp_base = Path(temp_base)
+            self.temp_base.mkdir(parents=True, exist_ok=True)
+            self.faiss_base = Path(faiss_base)
+            self.faiss_base.mkdir(parents=True, exist_ok=True)
+
+            self.temp_dir = self._resolve_dir(self.temp_base)
+            self.faiss_dir = self._resolve_dir(self.faiss_base)
+            self.log.info(f"ChatIngestor initialized with session ID: {self.session_id} and data directory: {self.temp_dir}")
+
         except Exception as e:
             self.log.error(f"Error initializing ChatIngestor: {str(e)}")
-            raise CustomException(f"Failed to initialize ChatIngestor: {str(e)}", sys)
+            raise CustomException(f"Failed to initialize ChatIngestor:", e) from e
     
-    def _resolve_directory(self):
+    def _resolve_dir(self, base):
         try:
-            pass
+            if self.use_session:
+                d = base/self.session_id
+                d.mkdir(parents=True, exist_ok=True)
+                return d
+            return base
         except Exception as e:
             self.log.error(f"Error resolving directory: {str(e)}")
             raise CustomException(f"Failed to resolve directory: {str(e)}", sys)
     
-    def _split(self):
+    def _split(self, docs, chunk_size=1000, chunk_overlap=200):
         try:
-            pass
+            splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+            chunks = splitter.split_documents(docs)
+            self.log.info(f"Created splitter with {len(chunks)} chunks")
+            return chunks
         except Exception as e:
             self.log.error(f"Error splitting: {str(e)}")
-            raise CustomException(f"Failed to split: {str(e)}", sys)
+            raise CustomException(f"Failed to split: }", e) from e
     
-    def built_retriever(self):
+    def built_retriever(self,
+                        uploaded_files, 
+                        *,
+                        chunk_size=1000, 
+                        chunk_overlap=200,
+                        k=5):
         try:
-            pass
+            paths = save_uploaded_files(uploaded_files, self.temp_dir)
+            docs = load_documents(paths)
+            if not docs:
+                raise ValueError("No documents found in uploaded files.")
+            
+            chunks = self._split(docs, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+            fm = FaissManager(self.faiss_dir, self.model_loader)
+            texts = [doc.page_content for doc in chunks]
+            metas = [doc.metadata for doc in chunks]
+            try:
+                vs = fm.load_or_create(texts=texts, metadata=metas)
+            except Exception:
+                vs = fm.load_or_create(texts=texts, metadata=metas)
+            
+            added = fm.add_documents(chunks)
+            self.log.info(f"Added {added} new documents to FaissManager.")
+            return vs.as_retriever(search_type="similarity", search_kwargs={"k": k})
         except Exception as e:
             self.log.error(f"Error building retriever: {str(e)}")
-            raise CustomException(f"Failed to build retriever: {str(e)}", sys)
+            raise CustomException(f"Failed to build retriever:", e) from e
         
 
 class DocumentHandler:

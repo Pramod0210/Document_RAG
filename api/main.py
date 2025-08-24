@@ -35,11 +35,11 @@ templates = Jinja2Templates(directory="../templates")
 class FastAPIFileAdaptor:
     def __init__(self, uf:UploadFile):
         self._uf = uf
-        self.filename = uf.filename
+        self.name = uf.filename
     
     def getbuffer(self):
         self._uf.file.seek(0)
-        return self._uf.file
+        return self._uf.file.read()
     
 def _read_pdf_via_handler(handler: DocumentHandler, path):
     try:
@@ -71,7 +71,7 @@ async def analyze(file: UploadFile = File(...)):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analysis failed: + str(e)")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: + {str(e)}")
     
 @app.post("/compare")
 async def compare(reference: UploadFile = File(...), actual: UploadFile = File(...)):
@@ -87,7 +87,7 @@ async def compare(reference: UploadFile = File(...), actual: UploadFile = File(.
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analysis failed: + str(e)")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: + {str(e)}")
 
 @app.post("/chat/index")
 async def chat_build_index(
@@ -112,7 +112,7 @@ async def chat_build_index(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analysis failed: + str(e)")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: + {str(e)}")
 
 @app.post("/chat/query")
 async def chat_query(
@@ -127,7 +127,7 @@ async def chat_query(
         
         index_dir = os.path.join(FAISS_BASE, session_id) if use_session_dirs else FAISS_BASE
         if not os.path.isdir(index_dir):
-            raise HTTPException(status_code=404, detail="Index not found.")
+            raise HTTPException(status_code=404, detail=f"Index not found. {index_dir}")
         
         rag = ConversationalRAG(session_id=session_id)
         rag.load_retriever_from_faiss(index_dir)
@@ -140,7 +140,7 @@ async def chat_query(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analysis failed: + str(e)")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: + {str(e)}")
 
 
 # Fastapi Command

@@ -5,7 +5,7 @@ import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Iterable, Optional, Dict, Any
-from utills.model_loader import ModelLoader
+from utils.model_loader import ModelLoader
 from logger.custom_logger import CustomLogger
 from exception.custom_exception import CustomException
 

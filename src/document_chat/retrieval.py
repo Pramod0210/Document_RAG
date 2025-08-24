@@ -16,13 +16,11 @@ class ConversationalRAG:
         try:
             self.log = CustomLogger().get_logger(__name__)
             self.session_id = session_id
-            self.retriever = retriever
             self.llm = self._load_llm()
             self.contextaualize_question = PROMPT_REGISTRY[PromptType.CONTEXTUALIZE_QUESTION.value]
             self.context_qa = PROMPT_REGISTRY[PromptType.CONTEXT_QA.value]
             if retriever is None:
                 raise ValueError("Retriever is not provided.")
-
             self.retriever = retriever
             self._build_lcel_chain()
             self.log.info(f"ConversationalRAG initialized with context and history aware retriever.")

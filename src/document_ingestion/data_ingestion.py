@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import sys
 from pathlib import Path
@@ -6,7 +7,6 @@ from datetime import datetime
 import json
 import shutil
 from typing import List, Iterable, Optional, Dict, Any
-from __future__ import annotations
 import hashlib
 
 import fitz
@@ -42,7 +42,7 @@ class FaissManager:
                     self._meta = {"rows":{}}
 
             self.model_loader = model_loader or ModelLoader()
-            self.emb = self.model_loader.load_embedding()
+            self.emb = self.model_loader.load_embeddings()
             self.vs: Optional[FAISS] = None
 
             self.log.info(f"Initialized FaissManager with index directory: {self.index_dir}")
@@ -104,7 +104,7 @@ class FaissManager:
     def load_or_create(self, texts:Optional[List[str]]=None, metadata: Optional[List[dict]]=None):
         try:
             if self._exists():
-                self.vs = FAISS.load_local(str(self.index_dir), self.emb, allow_dangerous_deserialization=True)
+                self.vs = FAISS.load_local(str(self.index_dir), embeddings =self.emb, allow_dangerous_deserialization=True)
                 self.log.info("Loaded existing FaissManager.")
                 return self.vs
             
@@ -164,7 +164,7 @@ class ChatIngestor:
             return chunks
         except Exception as e:
             self.log.error(f"Error splitting: {str(e)}")
-            raise CustomException(f"Failed to split: }", e) from e
+            raise CustomException(f"Failed to split:", e) from e
     
     def built_retriever(self,
                         uploaded_files, 

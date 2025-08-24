@@ -1,0 +1,8 @@
+myvenv
+.env
+__pycache__/
+logs/
+faiss_index/
+Document_RAG.egg-info
+*.pyc
+# data/

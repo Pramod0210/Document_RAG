@@ -1,4 +1,6 @@
 # Fastapi Command
 # uvicorn main:app --reload
 
-# docker run -d -p 8080:8000 --name my-doc-rag document-rag-system
+# docker build -t document-rag-system .
+
+# docker run -d -p 8092:8000 --name docapp document-rag-system

@@ -24,7 +24,7 @@ Resources:
   MyECRRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: documentrag
+      RepositoryName: document-rag
       ImageScanningConfiguration:
         ScanOnPush: true
       ImageTagMutability: MUTABLE
@@ -100,7 +100,7 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: document-rag-cluster
+      ClusterName: document-rag-cluster-test
 
   ### ECS Execution Role with Secrets + Logs
   ECSExecutionRole:
@@ -161,16 +161,12 @@ Resources:
             - ContainerPort: 8080
           Environment:
             - Name: LANGCHAIN_PROJECT
-              Value: DOCUMENT RAG
+              Value: DOCUMENT_RAG
           Secrets:
             - Name: GROQ_API_KEY
               ValueFrom: arn:aws:secretsmanager:us-east-2:100627279444:secret:GROQ_API_KEY
-            - Name: HF_TOKEN
-              ValueFrom: arn:aws:secretsmanager:us-east-2:100627279444:secret:HF_TOKEN
             - Name: GOOGLE_API_KEY
               ValueFrom: arn:aws:secretsmanager:us-east-2:100627279444:secret:GOOGLE_API_KEY
-            - Name: LANGCHAIN_API_KEY
-              ValueFrom: arn:aws:secretsmanager:us-east-2:100627279444:secret:LANGCHAIN_API_KEY
           LogConfiguration:
             LogDriver: awslogs
             Options:

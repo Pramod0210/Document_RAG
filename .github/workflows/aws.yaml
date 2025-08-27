@@ -8,7 +8,7 @@ env:
   AWS_REGION: us-east-2
   ECR_REPOSITORY: document-rag
   ECS_SERVICE: document-rag-service
-  ECS_CLUSTER: document-rag-cluster
+  ECS_CLUSTER: document-rag-cluster-test
   ECS_TASK_DEFINITION: .github/workflows/task_definition.json
   CONTAINER_NAME: document-rag-container
 

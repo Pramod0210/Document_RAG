@@ -15,6 +15,7 @@ from src.document_ingestion.data_ingestion import (
 from src.document_analyzer.data_analysis import DocumentAnalyzer
 from src.document_compare.doc_compare import DocumentCompareLLM
 from src.document_chat.retrieval import ConversationalRAG
+from pathlib import Path
 
 UPLOAD_BASE = os.getenv("UPLOAD_BASE", "data")
 FAISS_BASE = os.getenv("FAISS_BASE", "faiss_index")
@@ -29,9 +30,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="../static"), name="static")
+BASE_DIR = Path(__file__).resolve().parent.parent
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
-templates = Jinja2Templates(directory="../templates")
+# app.mount("/static", StaticFiles(directory="../static"), name="static")
+
+# templates = Jinja2Templates(directory="../templates")
 class FastAPIFileAdaptor:
     def __init__(self, uf:UploadFile):
         self._uf = uf

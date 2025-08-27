@@ -14,15 +14,14 @@ env:
     CONTAINER_NAME: "document-rag-container"
 
 permissions:
-    contents: read
     id-token: write
+    contents: read
 
 jobs:
     deploy:
         name: Deploy
         runs-on: ubuntu-latest
         environment: production
-
         steps:
             - name: Checkout repository
               uses: actions/checkout@v3

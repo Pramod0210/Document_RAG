@@ -1,30 +1,30 @@
+# Use official Python image
 FROM python:3.10-slim
 
-# SET ENVIRONMENT VARIABLES
-ENV PYTHONUNBUFFERED = 1
-ENV PYTHONDONTWRITEBYTECODE = 1
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# SET WORKING DIRECTORY
+# Set workdir
 WORKDIR /app
 
-# INSTALL DEPENDENCIES
+# Install OS dependencies
 RUN apt-get update && apt-get install -y build-essential poppler-utils && rm -rf /var/lib/apt/lists/*
 
-# COPY REQUIREMENTS
+# Copy requirements
 COPY requirements.txt .
-COPY .env .
 
-# COPY PROJECT PLAN
+# Copy project files
 COPY . .
 
-# INSTALL DEPENDENCIES
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# EXPOSE PORT
-EXPOSE 8000
+# Expose port
+EXPOSE 8080
 
-# RUN SERVER
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Run FastAPI with uvicorn
+#CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]
 
-# PRODUCTION ENVIRONMENT
-# CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+# Replace last CMD in prod
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4"]

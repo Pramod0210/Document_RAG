@@ -4,10 +4,7 @@
     "cpu":"1024",
     "memory":"8192",
     "executionRoleArn":"arn:aws:iam::100627279444:role/ecsTaskExecutionRole",
-    "taskRoleArn":"arn:aws:iam::100627279444:role/ecsTaskExecutionRole",
-    "requiresCompatibilities":[
-        "FARGATE"
-    ],
+    "requiresCompatibilities":[ "FARGATE"],
     "containerDefinitions":[
         {
             "name":"document-rag-container",
@@ -16,8 +13,8 @@
             "essential":true,
             "portMappings":[
                 {
-                    "containerPort":8000,
-                    "hostPort":8000,
+                    "containerPort":8080,
+                    "hostPort":8080,
                     "protocol":"tcp",
                     "name":"document-rag-container-8080-tcp",
                     "appProtocol":"http"
@@ -25,20 +22,15 @@
             ],
             "environment":[
                 {
-                    "name":"LANGCHAIN_PROJECT",
-                    "value":"DOCUMENT_RAG"
+                    "name":"ENV",
+                    "value":"production"
                 }
             ],
-            "secrets":[
-                {
-                    "name":"GROQ_API_KEY",
-                    "valueFrom":"arn:aws:secretsmanager:us-east-2:100627279444:secret:llm_api_keys-bey7PW:GROQ_API_KEY"
-                },
-                {
-                    "name":"GOOGLE_API_KEY",
-                    "valueFrom":"arn:aws:secretsmanager:us-east-2:100627279444:secret:llm_api_keys-bey7PW:GOOGLE_API_KEY"
-                }
-
+            "secrets": [
+            {
+            "name": "llm_api_keys",
+            "valueFrom": "arn:aws:secretsmanager:us-east-2:100627279444:secret:llm_api_keys-bey7PW"
+            }
             ],
             "logConfiguration":{
                 "logDriver":"awslogs",
@@ -46,9 +38,7 @@
                     "awslogs-group":"/ecs/documentrag",
                     "awslogs-region":"us-east-2",
                     "awslogs-stream-prefix":"ecs",
-                    "awslogs-create-group":"true",
-                    "mode":"non-blocking",
-                    "max-buffer-size":"25m"
+                    "awslogs-create-group":"true"
                 }
             }
         }

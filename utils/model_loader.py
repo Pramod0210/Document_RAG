@@ -4,18 +4,68 @@ from dotenv import load_dotenv
 from utils.config_loader import load_config
 from logger.custom_logger import CustomLogger
 from exception.custom_exception import CustomException
-
+import json
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 
 log = CustomLogger().get_logger(__name__)
 
-class ModelLoader:
+class ApiKeyManager:
+    REQUIRED_KEYS = ["GROQ_API_KEY", "GOOGLE_API_KEY"]
+
     def __init__(self):
-        load_dotenv()
-        self._validate_env()
+        self.api_keys = {}
+        raw = os.getenv("API_KEYS")
+
+        if raw:
+            try:
+                parsed = json.loads(raw)
+                if not isinstance(parsed, dict):
+                    raise ValueError("API_KEYS is not a valid JSON object")
+                self.api_keys = parsed
+                log.info("Loaded API_KEYS from ECS secret")
+            except Exception as e:
+                log.warning("Failed to parse API_KEYS as JSON", error=str(e))
+
+        # Fallback to individual env vars
+        for key in self.REQUIRED_KEYS:
+            if not self.api_keys.get(key):
+                env_val = os.getenv(key)
+                if env_val:
+                    self.api_keys[key] = env_val
+                    log.info(f"Loaded {key} from individual env var")
+
+        # Final check
+        missing = [k for k in self.REQUIRED_KEYS if not self.api_keys.get(k)]
+        if missing:
+            log.error("Missing required API keys", missing_keys=missing)
+            raise CustomException("Missing API keys", sys)
+
+        log.info("API keys loaded", keys={k: v[:6] + "..." for k, v in self.api_keys.items()})
+
+
+    def get(self, key: str) -> str:
+        val = self.api_keys.get(key)
+        if not val:
+            raise KeyError(f"API key for {key} is missing")
+        return val
+
+
+class ModelLoader:
+    """
+    Loads embedding models and LLMs based on config and environment.
+    """
+
+    def __init__(self):
+        if os.getenv("ENV", "local").lower() != "production":
+            load_dotenv()
+            log.info("Running in LOCAL mode: .env loaded")
+        else:
+            log.info("Running in PRODUCTION mode")
+
+        self.api_key_mgr = ApiKeyManager()
         self.config = load_config()
-        log.info(f"Configuration loaded:", config_keys = list(self.config.keys()))
+        log.info("YAML config loaded", config_keys=list(self.config.keys()))
     
     def _validate_env(self):
         required_api_keys = ["GOOGLE_API_KEY", "GROQ_API_KEY"]

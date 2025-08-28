@@ -67,14 +67,6 @@ class ModelLoader:
         self.config = load_config()
         log.info("YAML config loaded", config_keys=list(self.config.keys()))
     
-    def _validate_env(self):
-        required_api_keys = ["GOOGLE_API_KEY", "GROQ_API_KEY"]
-        self.api_keys = {key: os.getenv(key) for key in required_api_keys}
-        missing_keys = [key for key, value in self.api_keys.items() if not value]
-        if missing_keys:
-            log.error(f"Missing required environment variables: {', '.join(missing_keys)}")
-            raise CustomException(f"Missing environment variables:", sys)
-        log.info("All required environment variables are set.")
 
     def load_embeddings(self):
         try:
@@ -93,7 +85,7 @@ class ModelLoader:
         log.info(f"Loading LLM with configuration")
         llm_block = self.config["llm"]
 
-        provider_key = os.getenv("LLM_PROVIDER", "groq")
+        provider_key = os.getenv("LLM_PROVIDER", "google")
         print('provider_key:', provider_key)
         
         if provider_key not in llm_block:

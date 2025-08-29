@@ -16,6 +16,7 @@ from src.document_analyzer.data_analysis import DocumentAnalyzer
 from src.document_compare.doc_compare import DocumentCompareLLM
 from src.document_chat.retrieval import ConversationalRAG
 from pathlib import Path
+from utils.cache import llm_cache 
 
 UPLOAD_BASE = os.getenv("UPLOAD_BASE", "data")
 FAISS_BASE = os.getenv("FAISS_BASE", "faiss_index")
@@ -150,3 +151,4 @@ async def chat_query(
 
 # Fastapi Command
 # uvicorn api.main:app --reload
+

@@ -1,6 +1,5 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-
 # Prompt for document analysis
 document_analysis_prompt = ChatPromptTemplate.from_template("""
 You are a highly capable assistant trained to analyze and summarize documents.
@@ -12,20 +11,22 @@ Analyze this document:
 {document_text}
 """)
 
+# Prompt for document comparison
 document_comparison_prompt = ChatPromptTemplate.from_template("""
-You are a highly capable assistant trained to compare documents. Your task are as follows:
-                                                              
-1. Compare the two documents provided
-2. Identify the differences and note down the page number
-3. The output you provide must be page wise comparison content
-4. If any page has no changes, it should be noted as "NO CHANGES"                                                                                                                     
+You will be provided with content from two PDFs. Your tasks are as follows:
+
+1. Compare the content in two PDFs
+2. Identify the difference in PDF and note down the page number 
+3. The output you provide must be page wise comparison content 
+4. If any page do not have any change, mention as 'NO CHANGE' 
 
 Input documents:
 
-{combined_docs} 
+{combined_docs}
 
-Your output should be in the following format:                                                                                                                                                                                                                                               
-{format_instructions} 
+Your response should follow this format:
+
+{format_instruction}
 """)
 
 # Prompt for contextual question rewriting
@@ -40,7 +41,7 @@ contextualize_question_prompt = ChatPromptTemplate.from_messages([
 ])
 
 # Prompt for answering based on context
-context_qa = ChatPromptTemplate.from_messages([
+context_qa_prompt = ChatPromptTemplate.from_messages([
     ("system", (
         "You are an assistant designed to answer questions using the provided context. Rely only on the retrieved "
         "information to form your response. If the answer is not found in the context, respond with 'I don't know.' "
@@ -50,10 +51,10 @@ context_qa = ChatPromptTemplate.from_messages([
     ("human", "{input}"),
 ])
 
-
+# Central dictionary to register prompts
 PROMPT_REGISTRY = {
     "document_analysis": document_analysis_prompt,
     "document_comparison": document_comparison_prompt,
     "contextualize_question": contextualize_question_prompt,
-    "context_qa":context_qa
+    "context_qa": context_qa_prompt,
 }

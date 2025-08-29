@@ -149,4 +149,4 @@ async def chat_query(
 
 
 # Fastapi Command
-# uvicorn main:app --reload
+# uvicorn api.main:app --reload

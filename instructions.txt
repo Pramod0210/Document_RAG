@@ -5,5 +5,5 @@ you have to add a code for dealing with table and images data also
 you have to add the evalation matrix using the DeepEval
 write at least 10 test cases
 this cases should be vaildate before the commit and after the commit
-add one login screen to your protal
-use the langchain inmemory cache and implement inside the project
+add one login screen to your protal 
+use the langchain inmemory cache and implement inside the project - Done

@@ -73,7 +73,8 @@ class ModelLoader:
             log.info("Loading embeddings...")
             model_name = self.config["embedding_model"]["model_name"]
             return GoogleGenerativeAIEmbeddings(
-                model=model_name
+                model=model_name, 
+                google_api_key=self.api_key_mgr.get("GOOGLE_API_KEY")
             )
 
         except Exception as e:
